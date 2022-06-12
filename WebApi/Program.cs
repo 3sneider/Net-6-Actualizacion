@@ -1,25 +1,17 @@
+using WebApi;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+// instanciamos a startup pasandole el Iconfiguration como parametro
+var startup = new Startup(builder.Configuration);
 
-builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+// invocamos el ConfigurationServices de starup y el parametro que solicita lo pasamos del builder
+startup.ConfigurationServices(builder.Services);
+
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
-
-app.UseHttpsRedirection();
-
-app.UseAuthorization();
-
-app.MapControllers();
+// invocamos el configure y de igual manera le pasamos los parametros de el app ya construida
+startup.Configure(app, app.Environment);
 
 app.Run();

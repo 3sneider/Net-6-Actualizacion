@@ -1,6 +1,6 @@
 Apuntes tutorial y novedades sobre .net 6
 
----------------------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------
 
 Este codigo esta totalmente basado en los ejercicios y en la explicacion dada por felipe gavilasn en su curos de udemy 
 Construyendo Web APIs con ASP.NET Core 6. 
@@ -37,5 +37,37 @@ a la seccion de [run an debugg] en la parte lateral izquierda de visual code.
 
 ya por ultimo creamos un archivo .gitignore para no subir cosas innecesarias a nuestro github
 
----------------------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------
+
+junto a la nueva version de .net con encontramos con la desaparicin de la clase startup, chora trae una nueva "reorganizacion"
+la cual agrupa todo en la clase program, en lo personal no me gusta, se ve muy desordenado, para ello podemos crear una clase
+Startup.cs para pasar alli los servicios y los midleware por defecto, seguimos los siguientes pasos.
+
+- primero creamos la clase Startup.cs
+
+- creamos el constructor de la clase y este por defecto va a recibir un parametro de tipo [Iconfiguration] el cual encapsulamos en 
+como propiedad.
+
+- vamos a crear dos metodos de tipo void, el primero sera el [ConfigurationServices] el cual recibira un parametro  de tipo
+[IServiceCollection], y un segundo metodo llamado [Configure] el cual recibira dos parametros, uno de tipo [IApplicationBuilder] 
+y otro de Tipo [IWebHostEnviroment]
+
+- todos los servicios que se encuentran en el prgram creados por el builder los pasamos a ConfigurationServices y los 
+invocamos desde la propiedad services del metodo [ConfigurationServices]
+
+- todos los middleware inyectados por app en program son pasados a la clase configure, a excepcion del app.run; 
+implementamos el [app.UseRouting] que ubicamos despues de [app.UseHttpRedirection] y remplazamos a [app.MapControllers] por
+[useEndpoint] que colocamos al final.
+
+- una vez tenemos todos los servicios y los middleware en el startup nos queda solo instanciar e inicializar los metodos desde la 
+clase program
+
+una configuracion adicional que podemos ejecutar para notener quepreocuparnos por los tipos de referencias nulas lo hacemos desde
+el [.csproj] cambiando la propiedad [Nulleable] a disable
+
+-----------------------------------------------------------------------------------------------------------------------------
+
+
+
+
 
