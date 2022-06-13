@@ -67,6 +67,91 @@ el [.csproj] cambiando la propiedad [Nulleable] a disable
 
 -----------------------------------------------------------------------------------------------------------------------------
 
+para empezar a entrar en materia lo primero de lo que partimos es de un controlador y una entidad, este controlador se va a encargar
+de administrar o de controlar las acciones que puedan realizar con una entidad, acciones crud, y que es una entidad, es una
+representacion de una tabla en una base de datos
+
+para crear un controlador se debe tener encuenta que, el nombre del controlador debe ir acompañado de la palabra Controller
+[ClaseController], debe implementar la clase [ControllerBase] y debe tener los decoradores [ControllerApi] y del decorador [Route()] que me
+ayudara a ubicar el endpoint con mayor facilidad
+
+si ya tenemos un controlador y una entidad ahora lo que necesitamos es generar la relacion a una base de datos, para ello vamos
+a usar el ORM de entity framework, para ello mediante el administrador de paquetes nugget de visual studio o mediante el cli de
+.Net vamos a instalas las siguientes librerias.
+
+antes de las librerias la instalacion por medio de linea d e comandos se hace por medio de algun administrador de paquetes en
+visual code o por medio de los siguientes comandos.
+
+*** nuget install [paquete]
+*** dotnet add package [paquete]
+
+los paquetes a instalar serian:
+
+*** Microsoft.EntityFrameworkCore.sqlServer
+*** Microsoft.EntityFrameworkCore.desing
+
+cuando los instalas desde visual studio no es necesario isntalar el desing, el primer paquete lo instala por añadidura, una
+vez tengamos instalados los paquetes necesarios podemos crear nuestro dbcontext el cual es quien nos ayudara a establecer la 
+coneccion con nuestra base de datos para ello creamos una clase preferiblemente en la carpeta entidades y que herede de la clase
+[DbContext] de entity framework
+
+en el dbContext vamos a recibir diferentes configuracines de nuestro entity framewor por medio de inyeccion de dependencias pero
+para ello lo primero con lo que debemos contar es con una cadena de conexion a una base de datos en nuestro proveedor de configuraciones
+appsetings
+
+si ya tenemos un controlador, una entidad, un dbcontext con un dbset a una tabla y una configuracion en nuestro proveedor de 
+configuraciones, lo que nos queda es inyectar esa configuracion en nuestro startup, cuando ya lo tengamos inyectado podremos
+generar migraciones, las cuales van a crear todo lo que nosotros codifiquemos en una base de datos, para crear una migracion 
+pdemos hacer uso de los siguientes comandos.
+
+*** dotnet tool install --global dotnet-ef // se instala una unica vez
+*** Add-Migration Inicial 
+*** dotnet-ef migrations add Inicial
+
+cuando se genera la migracion tenemos que ejecutarla para que se haga efectiva, para ello podemos ejecutar  los siguientes.
+
+*** Update Database 
+*** dotnet-ef database update
+
+cabe anotar que no hay necesidad ni de crer la base de datos, con migration la query se encarga de crear todo el esquema 
+de bases de datos, tablas, llaves foraneas, primaris etc etc si ya crea mos la tabla ahora podemos hacer consultas 
+directamente a la tabla usando linq, para lograr esto primero debemos inyectar el dbcontext que inicializamos 
+en el startup a cada uno de los controladores que hagan una consulta a una tabla de bases de datos y ejecutamos cada una de
+las acciones crud
+
+*** [T1AutoresController] es el controlador con el resumen de esta parte del tutorial
+
+ahora vamos a crear una relacion uno a muchos en donde vamos a decir que
+un autor puede corresponder con varios libros, primero como dato debemos tener encuenta que todas las entidades que yo 
+quiera representar en mi modelo de bases de datos deben estar en el DBSet del contexto.
+
+vamos a la clase 1 osea a la clase que va a tener mucho de algo, en este caso un autor puede tener muchos libros entonces 
+le agregamos a la clase autor una propiedad de navegacion donde decimos que va a tener un listado de libros.
+
+luego vamos a la clase muchos osea a la clase que va a depender de autor, en este caso la clase libros debe tener una 
+propiedad que indique que pertenece a un autor y a su vez una variable de navegacion que apunte a la entidad
+
+luego generamos una migracion para actualizar el modelo de datos y poder empezar a trabajar con data realcionada de forma 1 .. *
+
+al haber creado el DBSet para cada entidad esto me brinda la flexibilidad de poder trabajar con cada una de las tabls por
+separado y no dependiendo de ninguna otra como podria ser el caso en el que no pusieramos libro y para acceder a el 
+obligatoriamente tendriamos que hacerlo por medio del Autor
+
+ya desde cada uno de los controladores independientes podremos acceder a la data relacionada por medio de linq e include
+
+por ultimo debemos realizar una configuracion para que la data no se vuelba ciclica y esto nos genere errores de relacion
+en services.addControllers() agregamos la siguiente configuracion
+
+*** .AddJsonOptions(x => x.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
+
+-----------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+
+
+
 
 
 

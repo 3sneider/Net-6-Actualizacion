@@ -1,3 +1,7 @@
+using System.Text.Json.Serialization;
+using Microsoft.EntityFrameworkCore;
+using WebApi.Entidades;
+
 namespace WebApi
 {
     public class Startup
@@ -11,7 +15,14 @@ namespace WebApi
 
         public void ConfigurationServices(IServiceCollection services){
             
-            services.AddControllers();            
+            // configuracion para evitar data ciclica
+            services.AddControllers().AddJsonOptions(x =>
+                x.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);   
+
+            // inyectamos el dbcontext
+            services.AddDbContext<ApplicationDbContext>(options => 
+                options.UseSqlServer(Configuration.GetConnectionString("defaultConnection")));
+
             services.AddEndpointsApiExplorer();
             services.AddSwaggerGen();
         }
