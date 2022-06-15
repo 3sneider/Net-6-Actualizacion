@@ -5,7 +5,7 @@ using WebApi.Entidades;
 namespace WebApi.Controllers
 {
     [ApiController]
-    [Route("api/T1Autores")]
+    [Route("api/Autores")]
     public class AutoresController : ControllerBase
     {
         private readonly ApplicationDbContext context;

@@ -146,7 +146,28 @@ en services.addControllers() agregamos la siguiente configuracion
 
 -----------------------------------------------------------------------------------------------------------------------------
 
+para trabajar todo el tema sobre controladores nos valimos de los controladore, como lo es reglas de ruteo, respuestas de las 
+peticiones nos valimos de el controlador [T1AutoresController]
 
+-----------------------------------------------------------------------------------------------------------------------------
+
+Model binding es una opcion que nos permite mapear los datos de una peticion http a los parametros de un metodo o accion
+pueden ser los siguientes, cada uno de estos se puede marcar en los parametros del metodo ejemplo
+funcion([FromQuery] string parametro)
+
+[FromRoute] - para obtenerlos de la ruta / [HttpGet("{id:int}")]
+[FromBody] - para obtenerlos del cuerpo del mensaje / es lo que recibimos en los parametros de unmetodo
+[FromHeader] - para obtenerlos de la cabecera de la peticion // podemos recibir los datos de los header, como el contentype
+[FromQuery] - para obtenerlos de la ruta pero por query ?var=dato&var2=dato2 / cuando los parametros vienen desd la url
+[FromServices] - 
+[FromForm] - para obtenerlos desde un formulario
+
+-----------------------------------------------------------------------------------------------------------------------------
+
+para trabajar todo el tema sobre validaciones personalizadas, validaciones por modelo y validaciones por dataannotation nos 
+valimos de la entidad [testEntity] la cual no es mapeada a la base de datos al no tener un dataset en el dbContext
+
+-----------------------------------------------------------------------------------------------------------------------------
 
 
 
