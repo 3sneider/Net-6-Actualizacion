@@ -146,8 +146,8 @@ en services.addControllers() agregamos la siguiente configuracion
 
 -----------------------------------------------------------------------------------------------------------------------------
 
-para trabajar todo el tema sobre controladores nos valimos de los controladore, como lo es reglas de ruteo, respuestas de las 
-peticiones nos valimos de el controlador [T1AutoresController]
+para trabajar todo el tema sobre controladores , como lo es reglas de ruteo, respuestas de las peticiones nos valimos de el 
+controlador [T1AutoresController]
 
 -----------------------------------------------------------------------------------------------------------------------------
 
@@ -169,6 +169,129 @@ valimos de la entidad [testEntity] la cual no es mapeada a la base de datos al n
 
 -----------------------------------------------------------------------------------------------------------------------------
 
+inyectar dependencias lo podemos apreciar en la interfaz [IServicio] donde se explica y se resume como se inyecta una 
+dependencia en una clase, pero existe un concepto de mas alto nivel llamado el sistema de inyeccion de dependencias, para 
+configurar el sistema de inyeccion de dependencia debemos primero ubicarnos en la clase [startup] y desder el metodo 
+[configureServices] donde podemos configurar los servicios
+
+los servicios son los que resuelben un adependencia en el sistema de inyeccion de dependecias, con el sistema de inyeccion
+de dependencias centralizamos las dependencias para no tener que instanciarlas cada vez que instanciamos una clase que tiene
+dependencias, existen tres tipos de servicios
+
+AddTransient - un servicio transistorio quiere decir que cuando se requiera una instancia siempre se va a dar una nueva 
+instancia - para funciones siempre te va a dar una neueva instancia
+
+AddScoped - el tiempo de vida del servicio aumenta, ahora en ves de ser una instancia distinta va a ser dentro del mismo 
+contexto la misma instancia - aplicationdbcontext por ejemplo, es la misma instancia en la misma peticion http
+siempre te va a dar la misma instancia en la misma peticion http
+
+AddSingleton - con este siempre tenemos la misma instancia incluso en diferentes instancias del servicio - como capa de cache 
+con data de memoria para servir la misma data a todos los usuarios siempre te va a dar la misma instancia 
+inclusio en diferentes epticiones http
+
+un ejemplo claro y facil es la inyeccion de dbContext en el sistema de inyeccion de dependencias, como lo pueden notar en el 
+[startup] yo inyecto el dbcontext en los servicios de la aplicacion, esto automaticamente me habilita para que yo lo pueda
+recibir como parametro en el constructor de la clase que lo necesite, como en nuestros controladores, en el startup se inicializa 
+y ahi ya queda listo para poder ser usado
+
+en el controlador [T1LibrosController] vamos a ejemplificar la inyeccion de un adependencia en el sistema de inyeccion de 
+dependencias, como lo explicamos en la clase [Iservice] nosotros podemos inyectar un dato abstracto o uno concreto, por buenas
+practicas y para mayor flexibilidad vamos a inyectar una interfaz(dato abstracto), una vez ya inyectado en la clase a implementar
+en el constructor, vamos ahora a inyectarlo en el sitema de inyeccion de dependencias en el [startup]
+
+los loggers podemos colocar los emnsajes en bases de datos o controlarlos de alguna forma, para implementarlos es necesario 
+inyectar a la clase el servicio [ILogger<T>] donde T hace referencia a la misma clase donde se eesta inyectando, para ejemplificarlo
+de mejor manera podemos verlo en accion en la clase [servicioA] de [IServicio]
+
+existen 6 categorias de logers, estos se miden de mayor a menor nivel de severidad, segun el nivel que 
+elijamos el va a mostrar ese y los de menor severidad a el.
+Critical
+Error
+Warning
+Information
+debug
+Trace
+
+estos niveles pueden ser administrados desde el appsettings, en donde en loglevel le decimos desde que nivel queremos que nos 
+administre los logs (), desde que nivel y para que mnamespace queremos aplicar un log
+
+-----------------------------------------------------------------------------------------------------------------------------
+
+Middleware :
+una tuberia es una cadema de procesos conetados de tal forma que la salida de cada elemento de la cadena es la entrada del proximo, 
+cada uno de estos procesos se llama Middleware
+los middleware se pueden crear de dos formas, con codigo hardcodeado o podmos aislar su logica a una clase independiente
+
+los middleware son los que configuramos en nuestra clase startup en el metodo configure, es muy importante el orden ya que como 
+lo comentamos la salida de uno va a ser la entrada de el otro, estos se configuran mediante [IApplicationBuilder] que viene de la 
+clase program, desde el startup hardcodeado podemos crear un servicio con app.run() y dentro una funcion de flecha ahora, tambien podemos
+saltarnos la linealidad de una libreria anidandola a un map, osea a una ruta, lo podriamos ver en el startup.
+
+
+
+vamos a crear un middleware y a insetarlo en el startup para ello creamos la carpeta de middlewares y trabajamos desde 
+[LoguearRespuestaHTTPMiddleware.cs] y lo implementamos igual en el startup.
+
+-----------------------------------------------------------------------------------------------------------------------------
+
+Filtros:
+los filtros nos ayudan a correr codigo en determinados momentos del ciclo de vida del procesamiento de una peticion HTTP
+
+los filtros son utiles cuando tenemos la necesidad de ejecutar una logica en varias acciones de varios controladores y queremos
+tener que evitar tener que repetir codigo.
+
+filtros de autorizacion : si un usuario puede hacer una accion
+filtros de recursos : validaciones generales o una capa de cache
+filtros de accion : antes o despues de eejecutar una accion, para manipula los parametros de entrada o salida
+filtros de excepcion : captura excepciones no cacheados
+filtros de resultados ; despues de ejecutar un controlador
+
+pueden ejecutarse en tres niveles diferentes
+
+a nivel deaccion
+a nivel del controlador
+a nivel global
+
+un ejemplo de filtros de recursos es un filtro de cache que ya viene predefinido por le framework y que solo es necesario implementarlos
+para ello debemos primero que todo inyectar los servicios de cache en configureServices, este seria [services.AddResponseCaching();]
+luego implementamos le filtro [app.UseResponseCaching();] en un punto donde ya se halla retornado la informacion de los endpoints.
+
+si ya tenemos el servicio y el filtro implementados ahora vamos a invocarlos, estos se invocan como sifueran DataAnnotations en los 
+metodos, para verlo enaccion vamos a implementarlo en el metodo Get de [T1LibrosController]
+
+el filtro de authorize tambien lo podemos usar como el de cache, para ello perimero inyectamos el servicio 
+services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer();] y el filtro  [app.UseAuthorization();] y el 
+dataAnnotation seria [Authorize], pero esto es muy generico, mas adelante veremos un ejemplo mas completo.
+
+ya entendido comom funcionan cache y athorize podremos crear tambien filtros personalizados y filtrosd globales
+los filtros globales son clases que se programan mediante el uso de una interfaz que corresponde a alguno de los
+tippos de filtros mensionados, se inyectan en el sistema de inyeccion de dependencias y ya pueden ser usados como decorador
+en una accion o a nivel global
+
+para la creacion de un filtro personalizado y para tenerlos de forma ordenada los vamos a crear en la carpeta [Filtros], siempre que 
+creemos un filtro este debe implementar la interfaz [IActionFilter] o de cualquier otra implementacion de la libreria
+[Microsoft.AspNetCore.Mvc.Filters] segun el tipo de filtro que queramos inplementar, lo podemos ver ejemplificado en nuestro 
+filtro [MiFiltroDeAccion] o en [FiltroDeExcepcion]
+
+con el filtro de excecion que implementamos podemos cachear todas aquellas esxcepciones que precisamente no estan controladores
+para verlo es accion basta con forzar una exce con trwo
+
+una vez tengamos creados nuestros filtros lo unico que debemos hacer como indique antes es inyectarlo en el 
+sistema de inyeccion de dependencia y ya lo podremos usar coomo lo hicimos con el filtro de cache o authorize, la estructura del dataannotation
+seria [ServiceFilter(typeof(MiFiltroDeAccion))], lo vamos a usar de forma generica para el metodo post en [T1LibrosController]
+
+la unica diferencia es que ssi lo queremos generico se lo agregamos al metodo y si lo queremos global tenemos que agregarlo en la configuracion
+del servicio de controles en el ConfigureService en el sevicio AddControllers, lo agregamos como una funcion de flecha y quedaria algo asi
+
+services.AddControllers(opciones => { opciones.Filters.Add(typeof(FiltroDeExcepcion))}).....
+
+por ultimo para cerrar el tema de filtros tenemos en ocaciones la necesidad de ejecutar tareass recurrentes, esto se puede
+lograr de varias maneras, una es un hostedServics, el que se ejecutara al inicio y al final del tiempo de vida de neustro webapi.
+
+esto la vamos a ejemplificar en lo que a su ves se considera un servicio y por ende lo organizamos en la carpeta Servicios, 
+el archivo se llamara [EscribirEnArchivo]
+
+-----------------------------------------------------------------------------------------------------------------------------
 
 
 

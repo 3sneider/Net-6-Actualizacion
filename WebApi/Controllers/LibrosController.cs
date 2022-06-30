@@ -12,7 +12,7 @@ namespace WebApi.Controllers
 
         public LibrosController(ApplicationDbContext context)
         {            
-            
+            this.context = context ;
         }
 
         [HttpGet("{id:int}")]
