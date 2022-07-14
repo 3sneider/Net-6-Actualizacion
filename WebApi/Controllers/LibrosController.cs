@@ -1,39 +1,154 @@
+using AutoMapper;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using WebApi.DTOs;
 using WebApi.Entidades;
 
 namespace WebApi.Controllers
 {
     [ApiController]
-    [Route("api/T1libros")]
+    [Route("api/libros")]
     public class LibrosController: ControllerBase
     {
         private readonly ApplicationDbContext context;
+        private readonly IMapper mapper;
 
-        public LibrosController(ApplicationDbContext context)
+        public LibrosController(ApplicationDbContext context, IMapper mapper)
         {            
             this.context = context ;
+            this.mapper = mapper;
         }
 
-        [HttpGet("{id:int}")]
-        public async Task<ActionResult<Libro>> Get(int id)
+        [HttpGet("{id:int}", Name = "ObtenerLibro")]
+        public async Task<ActionResult<LibroDTOConAutores>> Get(int id)
         {
-            return await context.Libros.Include(x => x.Autor).FirstOrDefaultAsync(x => x.Id == id);
-        }
+            var libro = await context.Libros
+                // .Include(comentarioDB => comentarioDB.Comentarios) 
+                // wsto es redundante ya que por eficiendcia tenemos un controlador que se encarga de manejar
+                // los comentarios de una forma independiente
+                .Include(libroDB => libroDB.AutoresLibros)
+                .ThenInclude(autorLibroDB => autorLibroDB.Autor)
+                .FirstOrDefaultAsync(x => x.Id == id);
 
-        [HttpPost]
-        public async Task<ActionResult> Post(Libro libro)
-        {
-            var existeAutor = await context.Autores.AnyAsync(x => x.Id == libro.AutorId);
-
-            if (!existeAutor)
+            if (libro == null)
             {
-                return BadRequest($"No existe el autor de Id: {libro.AutorId}");
+                return NotFound();
             }
+
+            libro.AutoresLibros = libro.AutoresLibros.OrderBy(x => x.Orden).ToList();
+
+            return mapper.Map<LibroDTOConAutores>(libro);
+        }
+
+         [HttpPost]
+        public async Task<ActionResult> Post(LibroCreacionDTO libroCreacionDTO)
+        {
+            // validamos que los libros vengan con autores
+            if (libroCreacionDTO.AutoresIds == null)
+            {
+                return BadRequest("No se puede crear un libro sin autores");
+            }
+
+            // validamos que los autores existan en la base de datos
+            var autoresIds = await context.Autores
+                .Where(autorBD => libroCreacionDTO.AutoresIds.Contains(autorBD.Id)).Select(x => x.Id).ToListAsync();
+
+            if (libroCreacionDTO.AutoresIds.Count != autoresIds.Count)
+            {
+                return BadRequest("No existe uno de los autores enviados");
+            }
+
+            var libro = mapper.Map<Libro>(libroCreacionDTO);
+            AsignarOrdenAutores(libro);
 
             context.Add(libro);
             await context.SaveChangesAsync();
-            return Ok();
+
+            var libroDTO = mapper.Map<LibroDTO>(libro);
+
+            return CreatedAtRoute("ObtenerLibro", new { id = libro.Id }, libroDTO);
+        }
+
+        [HttpPut("{id:int}")]
+        public async Task<ActionResult> Put(int id, LibroCreacionDTO libroCreacionDTO)
+        {
+            var libroDB = await context.Libros
+                .Include(x => x.AutoresLibros)
+                .FirstOrDefaultAsync(x => x.Id == id);
+
+            if (libroDB == null)
+            {
+                return NotFound();
+            }
+
+            libroDB = mapper.Map(libroCreacionDTO, libroDB);
+
+            AsignarOrdenAutores(libroDB);
+
+            await context.SaveChangesAsync();
+            return NoContent();
+        }
+
+        // actualizaciones parciales sobre un recurso por medio de jsonPatch
+        [HttpPatch("{id:int}")]
+        public async Task<ActionResult> Patch(int id, JsonPatchDocument<LibroPatchDTO> patchDocument)
+        {
+            if (patchDocument == null)
+            {
+                return BadRequest();
+            }
+
+            var libroDB = await context.Libros.FirstOrDefaultAsync(x => x.Id == id);
+
+            if (libroDB == null)
+            {
+                return NotFound();
+            }
+
+            var libroDTO = mapper.Map<LibroPatchDTO>(libroDB);
+
+            patchDocument.ApplyTo(libroDTO, ModelState);
+
+            var esValido = TryValidateModel(libroDTO);
+
+            if (!esValido)
+            {
+                return BadRequest(ModelState);
+            }
+
+            mapper.Map(libroDTO, libroDB);
+
+            await context.SaveChangesAsync();
+            return NoContent();
+        }
+
+        [HttpDelete("{id:int}")]
+        public async Task<ActionResult> Delete(int id)
+        {
+            var existe = await context.Libros.AnyAsync(x => x.Id == id);
+
+            if (!existe)
+            {
+                return NotFound();
+            }
+
+            context.Remove(new Libro() { Id = id });
+            await context.SaveChangesAsync();
+            return NoContent();
+        }
+
+
+         private void AsignarOrdenAutores(Libro libro)
+        {
+            if (libro.AutoresLibros != null)
+            {
+                for (int i = 0; i < libro.AutoresLibros.Count; i++)
+                {
+                    libro.AutoresLibros[i].Orden = i;
+                }
+            }
+
         }
     }
 }

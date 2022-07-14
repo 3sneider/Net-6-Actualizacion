@@ -293,6 +293,99 @@ el archivo se llamara [EscribirEnArchivo]
 
 -----------------------------------------------------------------------------------------------------------------------------
 
+como manipular recursos con entity framework, a profundidad
+entity framework es un orm que te permite a partir dfe clases de c# interactura con una tabla de bases de datos, recordemos que 
+para trabajar con cualquier base de datos podemos buscarlo desde el administrador de paquetes nugget e instalarlo, como usualmente
+trabajamos es con mssql server mostramos ese paquete, pero para los demas motores de bases de datos es exactamente igual.
+
+*** Microsoft.EntityFrameworkCore.sqlServer
+*** Microsoft.EntityFrameworkCore.desing
+
+el primero es el paquete de sql server para entity framework y el segundo es el desing que nos ayuda con librerias que hacen la 
+implementacion mas sencilla.
+
+una vez instalados los paquetes necesarios debemos crear nuestro DbContext que es quien nos va a generar esa coneccion entre 
+nuestras entidades/clases con las tablas de la base de datos, usualmente se sugiere ordenarlo dentro de la carpeta entities ya 
+que ahi tambien vamos a tener las clases a referenciar
+
+esta clase se puede llamar como guste, solo se recomienda que le agregues al final la palabra DbContext para que sea mas sencillo
+de ubicar, tambien esta clase debe heredar la clase DbContext ya que es la clase central de todo entity framework.
+
+en este ejemplo usamos el esquema codigo primero, donde apartir de una codificacion bamos a crear unas tablas para ello cada 
+entidad que queramos establecer como una tabla la debemos agregar como una propiedad de tipo DbSet<T> donde T es la entidad, el 
+nombre que le asignemos a esta propiedad sera como se llamara la tabla en la base de datos, cabe anotar que todas las validaciones
+que agreguemos a las propiedades de nuestra entidad seran las mismas que se pasaran a la tabla, como el max lengt, require etc.
+
+cuando se tiene creado el dbContext lo siguiente es establecer la cadena de conneccion en nuestro proveedor de configuraciones,
+esto lo que nos dira es en donde vamos a crear esa base de datos y por ende las tablas y todo su contenido
+
+por ultimo para tener una configuracion basica es inyectar nuestro dbcontext en el sistema de inyeccion de dependencias para no 
+tener que declararlo en cada sitio donde se requiera si no que simplemente se inyecte en el constructor de cada clase que lo implemente
+
+ya teniendo la configuracion lo que procede es ejecutar migraciones para trasladar la logica del dbContext a una base de datos.
+para ello uamos los siguientes comandos.
+
+*** crear la migracion
+*** dotnet tool install --global dotnet-ef // se instala una unica vez
+*** Add-Migration Inicial 
+
+*** ejecutar la migracion
+*** dotnet-ef migrations add Inicial
+*** Update Database 
+*** dotnet-ef database update
+
+ya realizada la migracion podemos empezar a ejecutar acciones crud sobre nuestroas entidades y nuestros controladores, para ejemplificar
+vamos a hacer uso de [AutoresController] y [LibrosController] puesto que son los que tenemos limpios ya que los controladores
+T los usamos solo para tomar nota y aplicar ejemplos de los anteriores conceptos.
+
+para remasterizar lo desarrollado tengamos encuenta que no es optimo ni seguro exponer nuestras entidades, para ello nos valemos de un 
+recurso llamado DTO's y de automapper lo cual nos ayuda a maperar nuestras entidades a dtos ecxponiendo solo la data que nos interece mostrar, 
+para lograr esto una vez creadas nuestras entidades y nuestros dtos hacemos uso de la libreria [AutoMapper.Extensions.Microsoft.DependencyInjection] 
+e inyectamos el sevicio en el sistema de inyeccion de dependencias en el startup por medio del comando [services.AddAutoMapper(typeof(Startup));]
+
+Entoncs, tenemos que podemos crear dto de nuestras entidades para no afectar a las entidades que mapean a la base de datps, o pata no exponer
+data que pueda sedr sencible, en fin, la finalidad depende de la necesidad, paar ejmplificar creamos DTOs de nuestras entidades que reponden
+a cada una de las necesidades del Crud.
+
+una ves tengamos nuestro dto vamos a necesitar mapear el dto a la entidad, para ello nos apoyamos en la libreria de automapper
+que instalamos anteriormente  y que inyectamos en el sistema de inteccion de pependencias, ahora necesitamos configurar los mapeos
+para ello creamos una clase [AutomMapperProfiles.cs] como una utilidad os segun el orden que se le este dando, en esta clase se 
+configuraran todos los mapeos de entidades a Dtos y visebersa.
+
+relaciones
+
+para generar una relacion uno a muchos debemos tener dos propiedades de navegacion en cada una de las clases a relacionar, 
+como por ejemplo en libros y comentarios, un libro puede tener multiples comentarios pero un comentario solo puede pertenecer 
+a un unico libro, para ello en la entidad dependiente en este caso comentarios agregamos una propiedad id que haga referencia 
+al libro que pertenece junto a una porpiedad que haga referencia al objeto que queremos anidar, en este caso un libro; 
+agregamos una propiedad de navegacion a libros donde especificamos una lista de comentarios, en el momento de generar una 
+migracion con este tipo de referencia en nuestras entidades, el modelo se encargara de generar las llaves foraneas;
+
+DSebemos evaluar muy bien nuestros dtos en caso de que no queramos devolver informacion innecesarioa a nuestros usuarios finales, por 
+ejemplo los comentarios de un libro, tenemos un controlador que se encarga solamente de los ocmentarios de esta manera le 
+retornamos al uaurio la informacion del libro y luego si quiere los comentarios.
+
+para generar una relacion muchos a muchos decimos que un autor puede haber escrito muchos libros y un libro puede seer escrito 
+por muchos autores, para esta relacion mechos a muchos la modelamos en una clase intermediaria, AutoresLibros.cs con los id de 
+ambas tablas relacionadas y propiedades de navegacionn a ambas entidades, luego en cada una de las entidades relacionadas vamos 
+a tener tambien propiedades de navegacion que referencien a la clase intemrediaria, por ultimo agregamos el dbset en el dbcontext
+
+cuando hacemos una inserccion con una entidad que tiene una relacion muchos a muchos debemos tener cual es la entidad de mas 
+relevancia para lo que solicitamos en este caso como lo que queremos crear es un libro y desde ahi trabajar los autores vamos 
+a agregfar als propiedades que queraramos jalar de los autores en libros en el dto
+
+se ha trabajado las acciones crud de manera mas explicita en los controladores liblros, comentarios y autores, ahora vamos a 
+hacer HTTP patcj solo para actualizaciones parcioales a un recurso para ello nos guiamos con la estructura que define el estandar 
+Jsonpatch
+
+para poder hacer uso del json path necesitamos tener la siguiente libreira instalada
+
+*** Microsoft.AspNetCore.Mvc.NewtonsoftJson
+
+
+-----------------------------------------------------------------------------------------------------------------------------
+
+
 
 
 

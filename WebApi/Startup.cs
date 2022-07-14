@@ -23,7 +23,7 @@ namespace WebApi
             services.AddControllers(opciones => {
                 opciones.Filters.Add(typeof(FiltroDeExcepcion));
             }).AddJsonOptions(x =>
-                x.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);   
+                x.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles).AddNewtonsoftJson();   // se jace la insercion de jsonpach 
 
             // inyectamos el dbcontext
             services.AddDbContext<ApplicationDbContext>(options => 
@@ -44,7 +44,7 @@ namespace WebApi
 
             // inyectando el filtro MiFiltroDeAccion en el sistema de inyeccion de dependencia, el tipo de vida util
             // dependera de la complegidad de la logica del filtro
-            services.AddSingleton<MiFiltroDeAccion>();
+            // services.AddSingleton<MiFiltroDeAccion>(); // lo comentamos para que no nos siga llenando el log 
 
             // inyectamos nuestro servicio de tarea recurrente pero este tiene un agregado especial
             // lo agregamos al host, aunque tambien se podria agregar de tipo singleton
@@ -55,6 +55,9 @@ namespace WebApi
 
             services.AddEndpointsApiExplorer();
             services.AddSwaggerGen();
+
+            // servicio de automapper
+            services.AddAutoMapper(typeof(Startup));
         }
 
         // aqui se configuran los middleware

@@ -7,7 +7,7 @@ using WebApi.Servicios;
 namespace WebApi.Controllers
 {
     [ApiController]
-    [Route("api/libros")]
+    [Route("api/T1libros")]
     public class T1LibrosController: ControllerBase
     {
         private readonly ApplicationDbContext context;
@@ -88,11 +88,16 @@ namespace WebApi.Controllers
         // para posteriores consultas ya no llamamos ejecutamos el metodo nuevamente si no que la traemos del cache
         // se debe tener encuenta el tiempo de duracion del cache
         [ResponseCache(Duration = 10)]
-        public async Task<ActionResult<Libro>> Get(int id)
+        public ActionResult<Libro> Get(int id)
         {
             // como la relacion es bidireccional un autor puede tener muchos libros y asi mismo un libro pertenece a un autor
             // podemos incluir tambien la data del autor al que hace referencia
-            return await context.Libros.Include(x => x.Autor).FirstOrDefaultAsync(x => x.Id == id);
+
+            // esta se comenta ya que no podemos tener dos relaxciones al mismo objeto, como en este caso que primero
+            // trabajamos con una relacion uno a muchos para autores y libros pero ahora contamos con una muchos a muchoss
+            // return await context.Libros.Include(x => x.Autor).FirstOrDefaultAsync(x => x.Id == id);
+            return Ok();
+
         }
 
         [HttpPost]
@@ -100,13 +105,16 @@ namespace WebApi.Controllers
         [ServiceFilter(typeof(MiFiltroDeAccion))]
         public async Task<ActionResult> Post(Libro libro)
         {
-            // validamos la existencia de un autor antes de generar una consulta que pueda reventar
-            var existeAutor = await context.Autores.AnyAsync(x => x.Id == libro.AutorId);
+            // esta se comenta ya que no podemos tener dos relaxciones al mismo objeto, como en este caso que primero
+            // trabajamos con una relacion uno a muchos para autores y libros pero ahora contamos con una muchos a muchoss
 
-            if (!existeAutor)
-            {
-                return BadRequest($"No existe el autor de Id: {libro.AutorId}");
-            }
+            // validamos la existencia de un autor antes de generar una consulta que pueda reventar
+            // var existeAutor = await context.Autores.AnyAsync(x => x.Id == libro.AutorId);
+
+            // if (!existeAutor)
+            // {
+            //     return BadRequest($"No existe el autor de Id: {libro.AutorId}");
+            // }
 
             context.Add(libro);
             await context.SaveChangesAsync();
