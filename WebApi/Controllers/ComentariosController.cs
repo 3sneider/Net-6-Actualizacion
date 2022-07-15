@@ -14,12 +14,14 @@ namespace WebApi.Controllers
     {
         private readonly ApplicationDbContext context;
         private readonly IMapper mapper;
+        private readonly IConfiguration configuration;
 
         public ComentariosController(ApplicationDbContext context,
-            IMapper mapper)
+            IMapper mapper, IConfiguration configuration)
         {
             this.context = context;
             this.mapper = mapper;
+            this.configuration = configuration;
         }
 
         [HttpGet]
@@ -98,5 +100,21 @@ namespace WebApi.Controllers
             await context.SaveChangesAsync();
             return NoContent();
         }
+    
+        // metodo para traer datos mediante el proveedor de configuraciones, para ello inyectamos
+        // el iconfiguration el cual ya viene configurado 
+        [HttpGet("configuraciones")]
+        public ActionResult<string> ObtenerConfiguracion()
+        {
+            // existe una funcion especializada en jalar los datos de la ccadena de coneccion
+            // Configuration.GetConnectionString("defaultConnecrtion")
+
+            // para acceder a propiedades que estan dentro de propiedades lo unico que hacemos es 
+            // bajar un nivel con : ejemplo [Configuration["propiedad:propiedadhija"]]
+
+            // una ves inyectada la interfaz podemos conectar conlas propiedades del configuration
+            return configuration["nombre"];
+        }
+    
     }
 }

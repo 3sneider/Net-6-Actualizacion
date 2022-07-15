@@ -382,6 +382,63 @@ para poder hacer uso del json path necesitamos tener la siguiente libreira insta
 
 *** Microsoft.AspNetCore.Mvc.NewtonsoftJson
 
+-----------------------------------------------------------------------------------------------------------------------------
+
+las configuraciones son datos externos de nuestra aplicacion que ayudan a nuestra aplicacion a funcionar correctamente, estos
+datos tienden a variar entre ambientes, como por ejemplo la cadena de coneccion que tiene informacion de la base de datos, esta
+no es info que querramos tener en nuestro codigo fuente, es mejor tener estas y otras informaciones en funentes externas, para
+comunicarnos con esas fuentes externas usamos proveedores de configuracion, el framework de .net nos ofrece el iconfiguration 
+el ccual nos ofrece esa coneccion con la confiiguracion.
+
+si nos paramos en el appsetings y nos ubicamos el json,  y agragamos una nueva propiedad a dicho json por medio de nuestro 
+proveedor de configuraciones podremos acceder a esa propiedad como por ejemplo agregar una propiedad ["nombre": "esneider"], 
+por medio del iconfiguration desde cualquier parte de nuestro codigo lo podemos accesar de la siguiente maneras
+
+en nuestro controlador de comentarios vamos a tener un endpoint llamado configuraciones donde vamos a ejempliificar como vamos
+a traer la data de nuestro proveedor de configuracions appsettings
+
+existen diferentes proveedores de configuracion, el mas comun es el appsettings y el appsettingsDevelopment; para poder seleccionar
+con que ambiente queremos trabajar lo podemos seleccionar desde ñas propiedades del proyecto, en vs code lo podemos hacer cambiando
+las variables de ambiente, accedemos a esas propiedades desde la carpeta properties en el archivo json que ahi se hospeda en 
+la propiedad [ASPNETCORE_ENVIRONMENT].
+
+una variable de ambiente es un valor que uno puede acceder desde un ambiente especifico como proveedor de configuraciones, estas 
+se pueden agregar al mismo nivel donde encontramos la variable de nombre [ASPNETCORE_ENVIRONMENT]
+
+estas variables de ambiente tambien se pueden crear en azure o en aws o en cualquier proveedor de nube que me lo permita.
+
+otro dato que debemos tener en cuenta a la hora de declarar nuestras variables de ambiente es el orden, si uno tiene mas de un
+proveedor de configuraciones el valor siempre del ultimo valor configurado, si configuras primero uno en el lounch y luego una
+en el appsetings, este ultimo sera el que va a tener encuenta primero,  esto por el orden en que se compila el codigo de asp.net
+y lo podemos ver en el codigo fuente en la clase program.
+
+otra forma muy popular para tener estas variables aisladas es el uso de secretos, estos son variables declaradas en un archivo
+de nombre secrets.json, este archivo no se encuentra en el proyecto, este genera un id unico que serializa en la configuracion
+de la aplicacion, esta configurado para trabajar unicamente en el ambiente de desarrollo (equipo) donde se crea el secrets.json.
+para crear el user secret usamos el comando
+
+*** dotnet user-secrets init // en visual studio normal es click derecho user manage secrets
+
+y agregamos secretos con el comando
+
+*** dotnet user-secrets set "Movies:ServiceApiKey" "12345"
+
+y para ver los secretos usamos el comando
+
+*** dotnet user-secrets list
+
+si queremos eliminar los secretos ejecurtamos
+
+*** dotnet user-secrets clear
+
+si queremos eliminar un secreto en especifico ejecutamos
+
+*** dotnet user-secrets remove "Movies:ConnectionString"
+
+un ultimo proveedor de configuracion es la terminal de linea de comandos por donde posdremos pasarle parametros a nuestra 
+aplicacion, segun el orden este estara  por ensima de cualquier otro proveedor de configuracions, desde una terminal que 
+apunte a la carpeta delproyectocuando ejecutemos la aplicacion podemos arrancar nuestra aplicacion con parametros ejemplo
+[ dotnet run -- "apellido=apellido desde linea de comandos"]
 
 -----------------------------------------------------------------------------------------------------------------------------
 
