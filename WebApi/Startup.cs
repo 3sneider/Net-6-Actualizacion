@@ -1,5 +1,11 @@
+using System.IdentityModel.Tokens.Jwt;
+using System.Text;
 using System.Text.Json.Serialization;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using WebApi.Entidades;
 using WebApi.Filtros;
 using WebApi.Middlewares;
@@ -11,6 +17,8 @@ namespace WebApi
     {
         public Startup(IConfiguration configuration)
         {
+            // con esta configuracion limpiamos los cime
+            JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
             Configuration = configuration;
         }
 
@@ -28,6 +36,19 @@ namespace WebApi
             // inyectamos el dbcontext
             services.AddDbContext<ApplicationDbContext>(options => 
                 options.UseSqlServer(Configuration.GetConnectionString("defaultConnection")));
+
+            // necesario para agregar un sistema de seguridad por jwtoken y configuracion del mismo
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                .AddJwtBearer(opciones => opciones.TokenValidationParameters = new TokenValidationParameters { 
+                  ValidateIssuer = false,
+                  ValidateAudience = false,
+                  ValidateLifetime = true,
+                  ValidateIssuerSigningKey = true,
+                  IssuerSigningKey = new SymmetricSecurityKey(
+                      Encoding.UTF8.GetBytes(Configuration["llavejwt"])),
+                  ClockSkew = TimeSpan.Zero
+                });
+
 
             // ciclos de vida e inyeccion de dependencias
 
@@ -54,10 +75,69 @@ namespace WebApi
             services.AddResponseCaching();
 
             services.AddEndpointsApiExplorer();
-            services.AddSwaggerGen();
+
+            // configuracion de swagger para tener sistema de seguridad 
+            services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "WebAPIAutores", Version = "v1" });
+
+                c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+                {
+                    Name = "Authorization",
+                    Type = SecuritySchemeType.ApiKey,
+                    Scheme = "Bearer",
+                    BearerFormat = "JWT",
+                    In = ParameterLocation.Header
+                });
+
+                c.AddSecurityRequirement(new OpenApiSecurityRequirement
+                {
+                    {
+                        new OpenApiSecurityScheme
+                        {
+                            Reference = new OpenApiReference
+                            {
+                                Type = ReferenceType.SecurityScheme,
+                                Id = "Bearer"
+                            }
+                        },
+                        new string[]{}
+                    }
+                });
+
+            });
 
             // servicio de automapper
             services.AddAutoMapper(typeof(Startup));
+
+            // servicios necesarios para agregar identityframework para autenticacion y autorizacion
+
+            services.AddIdentity<IdentityUser, IdentityRole>()
+                .AddEntityFrameworkStores<ApplicationDbContext>()
+                .AddDefaultTokenProviders();
+
+            // configuracion de claims y permisos con politicas de seguridad
+            services.AddAuthorization(opciones =>
+            {
+                // en esta politica estamos diciendo que un usuario necesita una claim esAdmin para continuar con un endpoint
+                opciones.AddPolicy("EsAdmin", politica => politica.RequireClaim("esAdmin"));
+                opciones.AddPolicy("EsVendedor", politica => politica.RequireClaim("esVendedor"));
+            });
+
+            // servicio de proteccion de datos
+            services.AddDataProtection();
+
+            // agregamos el servicio de hash que creamos
+            services.AddTransient<HashService>();
+
+            // configuracion par evitar el problema de cors
+            services.AddCors(opciones =>
+            {
+                opciones.AddDefaultPolicy(builder =>
+                {
+                    builder.WithOrigins("https://www.apirequest.io").AllowAnyMethod().AllowAnyHeader(); // .WithExposedHeaders para exponer headers
+                });
+            });
         }
 
         // aqui se configuran los middleware
@@ -84,6 +164,7 @@ namespace WebApi
                 app.UseSwaggerUI();
             }
 
+            // redirecciona las peticiones https
             app.UseHttpsRedirection();
 
             // este lo agregamos por que no lo trae el program

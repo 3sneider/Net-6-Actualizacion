@@ -1,8 +1,9 @@
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace WebApi.Entidades
 {
-    public class ApplicationDbContext : DbContext
+    public class ApplicationDbContext : IdentityDbContext // DbContext libreria base, IdentityDbContext libreria con identity
     {
         // generamos contructor al cual podemos pasarle distintas configuraciones par entity framework
         public ApplicationDbContext(DbContextOptions options) : base(options)

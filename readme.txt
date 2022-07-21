@@ -442,7 +442,57 @@ apunte a la carpeta delproyectocuando ejecutemos la aplicacion podemos arrancar 
 
 -----------------------------------------------------------------------------------------------------------------------------
 
+authenticacion y autorizathion
 
+la autenticacion es la validacion por credenciales y la autorizacin son las cosas que el usuario puede hacer, los tipos de 
+autenticacion son 
+
+anonimo = cualquier persona
+basic = encryp en base 64 con ssl
+bearer = es basado en tokens
+
+para configurar el sitema de identity y tener unas tablas base para la autenticacion lo hacemos de la siguiente forma
+desde el explorador de soluciones instalamos el paquete [Microsoft.AspNetCore.Identity.EntityFrameworkCoree] esto ya que 
+estamos usando esntityframework
+
+ya instalado el paquete nos diriguimos a nuestra repositorio dbcontext y en vez de heredar de dbcontext vamos a heredar de la 
+clase [IdentityDbContext], cuando generemos una migracion este va a crear las clases necesarias para nuestra autenticacion;
+
+ya teniendo las tablas a configurar desde el startup vamos a inyectar los servicios necesario para poder implementar identity
+un avez inyectado en el startup podemos decorar un metodo o un controlador con el modificado autorize, esto para que cuando 
+intentemos ingrezar si no estamos authorizados no nos deje avanzar, como en get de AutoresController, si no estamos registrados
+nos arrojara un error 401 unauthorize
+
+el mecanismo por el cual los usuarios van a poder registrarse y loguearse lo haremos en el controlador cuentas, podemos ir
+probando los registros de usuario y autenticacion para que nos retorne el barer o token con el cual podremos acceder a los 
+demas recursos del aplicatiovo.
+
+para poder consumir nuestro servicio con autheticacion desde nuestro cliente de suqger configuramos las opciones del servicio 
+en Startup, lo que hacemos en esta configuracion es lo que tipicamente hacemos en una peticion con el encabezado
+'Authorization: Bearer TOKEN,
+
+ ya habiamos visto antes que podiamos agregar el decorador Authorize en el controlado y no en los end point para hacerlo global,
+ pero tambien existe un decorador contrario al authorize que lo que hace es que un endpoint que esta bajo en controlador con authorize
+ se lo salte, este decorador es el [AllowAnonymous]
+
+ la autorizacion basada en claims me permite aparte de loguear a una persona dar permisos sobre recursos, puede que qeuramos 
+ que una persona logueada haga unas tareas pero otras no, esto configurando el servicio addAuthorization en el appstarup
+
+ luego de agregar nuestra politica la podemos aplicar en nuestros controladores como en el endpoint de autoresController de no tener
+ el claim necesario retornara un erro 403 prohibido, reconoce que esta autenticado  per esa accion esta prohibida
+
+-----------------------------------------------------------------------------------------------------------------------------
+
+ el intercambio de recursos de origenes curzados es muy comun cuando hago una peticion desde el mismo origen , para configurar
+ el cors agregamos el servicio AddCors en el startup
+
+-----------------------------------------------------------------------------------------------------------------------------
+
+ para enciptar en asp net core se nos ofrece el servicio de enciptacion de datosm, para acceder a los servicios de proteccion
+ de datos ofercidos por .net agregamos el servicio services.AddDataProtection(); y luego inyectamos e instanciamos el servicio
+ dentro del constructor de el controlador
+
+-----------------------------------------------------------------------------------------------------------------------------
 
 
 

@@ -1,4 +1,6 @@
 using AutoMapper;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using WebApi.DTOs;
@@ -8,6 +10,7 @@ namespace WebApi.Controllers
 {
     [ApiController]
     [Route("api/Autores")]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Policy = "EsAdmin")] // protegemos un controlador con una politica aplicada
     public class AutoresController : ControllerBase
     {
         private readonly ApplicationDbContext context;
@@ -21,6 +24,7 @@ namespace WebApi.Controllers
         }
 
         [HttpGet] // Metodo para traer datos de una tabla
+        // [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)] // protegemos un endpoint
         public async Task<ActionResult<List<AutorDTO>>> Get()
         {
             var autores = await context.Autores.ToListAsync();
@@ -44,7 +48,7 @@ namespace WebApi.Controllers
             return mapper.Map<AutorDTOConLibros>(autor);
         }
 
-        [HttpGet("{nombre}")]
+        [HttpGet("{nombre}")]        
         public async Task<ActionResult<List<AutorDTO>>> Get([FromRoute] string nombre)
         {
             // tenemos una consulta con con una validacion linq
