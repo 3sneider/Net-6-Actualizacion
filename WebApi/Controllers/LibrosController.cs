@@ -41,7 +41,7 @@ namespace WebApi.Controllers
             return mapper.Map<LibroDTOConAutores>(libro);
         }
 
-         [HttpPost]
+         [HttpPost(Name = "crearLibro")]
         public async Task<ActionResult> Post(LibroCreacionDTO libroCreacionDTO)
         {
             // validamos que los libros vengan con autores

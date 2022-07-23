@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using WebApi.DTOs;
 using WebApi.Entidades;
+using WebApi.Utilidades;
 
 namespace WebApi.Controllers
 {
@@ -23,17 +24,23 @@ namespace WebApi.Controllers
             this.mapper = mapper;
         }
 
-        [HttpGet] // Metodo para traer datos de una tabla
+        [HttpGet(Name = "obtenreTodo")] // Metodo para traer datos de una tabla
         // [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)] // protegemos un endpoint
+        // en vez de traer una lista de dtos, puedo traer una colleccion de Recursos par que ya traigan toda su data integrada
+        // Task<ActionResult<ColeccionDeRecursos<AutorDTO>>> recordemos que tambien podemos retornar un IactionResult para poder retornar diferrentes tipos de respuesta
+        [ServiceFilter(typeof(HATEOASAutorFilterAttribute))]
         public async Task<ActionResult<List<AutorDTO>>> Get()
         {
             var autores = await context.Autores.ToListAsync();
             // mapeamos el resultado de la consulta con el DTO
-            return mapper.Map<List<AutorDTO>>(autores);
+            return mapper.Map<List<AutorDTO>>(autores);            
+
         }
 
         [HttpGet("{id:int}", Name = "obtenerAutor")]
-        public async Task<ActionResult<AutorDTOConLibros>> Get(int id)
+        // aplicamos el filtro una vez se de respuesta de la peticion agregaremos o no los enlaces segun sela el valor de header
+        [ServiceFilter(typeof(HATEOASAutorFilterAttribute))]
+        public async Task<ActionResult<AutorDTOConLibros>> Get(int id, [FromHeader] string incluirHATEOAS)
         {
             var autor = await context.Autores
                 .Include(autorDB => autorDB.AutoresLibros)
@@ -45,10 +52,11 @@ namespace WebApi.Controllers
                 return NotFound();
             }
 
-            return mapper.Map<AutorDTOConLibros>(autor);
+            var autorDTO = mapper.Map<AutorDTOConLibros>(autor);            
+            return autorDTO;
         }
 
-        [HttpGet("{nombre}")]        
+        [HttpGet("{nombre}", Name = "obtenerAutores")]        
         public async Task<ActionResult<List<AutorDTO>>> Get([FromRoute] string nombre)
         {
             // tenemos una consulta con con una validacion linq
@@ -57,7 +65,7 @@ namespace WebApi.Controllers
             return mapper.Map<List<AutorDTO>>(autores);
         }
         
-        [HttpPost] // metodo Create que toma su info del body de la peticion 
+        [HttpPost(Name = "crearAutor")] // metodo Create que toma su info del body de la peticion 
         public async Task<ActionResult> Post([FromBody] AutorCreacionDTO autorCreacionDTO) // recibimos un dto para no traer informacion  basurra o sencible
         {
             // primero validamos que la informacion no este repetida o cumpla con nuestras necesidades

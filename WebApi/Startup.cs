@@ -3,6 +3,7 @@ using System.Text;
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -10,6 +11,7 @@ using WebApi.Entidades;
 using WebApi.Filtros;
 using WebApi.Middlewares;
 using WebApi.Servicios;
+using WebApi.Utilidades;
 
 namespace WebApi
 {
@@ -69,7 +71,7 @@ namespace WebApi
 
             // inyectamos nuestro servicio de tarea recurrente pero este tiene un agregado especial
             // lo agregamos al host, aunque tambien se podria agregar de tipo singleton
-            services.AddHostedService<EscribirEnArchivo>();
+            // services.AddHostedService<EscribirEnArchivo>(); comentamos para que no siga escribiendo en el archivo plano
 
             // inyectamos los servicios de responseCaching  para que puedan ser usados como filtros
             services.AddResponseCaching();
@@ -80,7 +82,8 @@ namespace WebApi
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "WebAPIAutores", Version = "v1" });
-
+                // esto es para agregar los parametros en el swagger
+                c.OperationFilter<AgregarParametroHATEOAS>();
                 c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
                 {
                     Name = "Authorization",
@@ -138,6 +141,12 @@ namespace WebApi
                     builder.WithOrigins("https://www.apirequest.io").AllowAnyMethod().AllowAnyHeader(); // .WithExposedHeaders para exponer headers
                 });
             });
+
+
+            // agregamos los servicios para el generador de HATEOAS
+            services.AddTransient<GeneradorEnlaces>();
+            services.AddTransient<HATEOASFiltroAttribute>();
+            services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
         }
 
         // aqui se configuran los middleware
