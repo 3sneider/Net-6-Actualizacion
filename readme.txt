@@ -494,7 +494,25 @@ en Startup, lo que hacemos en esta configuracion es lo que tipicamente hacemos e
 
 -----------------------------------------------------------------------------------------------------------------------------
 
+HATEOAS: con swagger tenemos como navegar nueestros endpoints, hateoas nos permite navegar por las acciones que puede realizar 
+el cliente pero de manera mas especifica y detallada que swagger, para implementarlo a nivel de codigo lo que hacemos es
+crear una clase que tenga propiedade de enlace, descriocion y metodo, para ello hacemos uso del dto DatoHATEOAS y Recurso
 
+lo primero que hacemos en retornar desde una ruta las distintas rutas de nuestra api, sera como una raiz que reotornara todo lo 
+que el usuario puede hacer, para ello creamos el controlador rootcontroller donde vamos a registrar todas las url de los end points
+del cliente 
+
+para que se agreguen dede autores un dto tenemos que hacer que nuestros dtohereden de recurso y crear un metoso para que asigne
+las url del revurso 
+
+como ya lo vimos en el controlador de autores en su metodo get podemos agregar y condicionar la generacion de los links pero 
+en caso de que queramos minimizar el codigo que nos esta quedando en el metodo para una simple consulta GET lo que podemos hacer
+es valernos de los filtros [HATEOASFiltroAttribute].
+
+en conclucin el tema de hateoas es bueno en cuanto sea necesario retornar data detallada de las url o de los endpoints y no 
+queramos hacer uso de swagger, el tema es muy denso en caso de que se quiera estudiar a profuncidad
+
+-----------------------------------------------------------------------------------------------------------------------------
 
 
 
