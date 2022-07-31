@@ -7,12 +7,12 @@ using Microsoft.EntityFrameworkCore;
 using WebApi.DTOs;
 using WebApi.Entidades;
 
-namespace WebApi.Controllers
+namespace WebApi.Controllers.v1
 {
     // como esta es una clase dependiente de la clase libro, osea, si noexiste un libro
     // no eiste un comentario sobre ese lobro, para ello usamos esta nomenclatura de ruta
     [ApiController]
-    [Route("api/libros/{libroId:int}/comentarios")]
+    [Route("api/v1/libros/{libroId:int}/comentarios")]
     public class ComentariosController: ControllerBase
     {
         private readonly ApplicationDbContext context;

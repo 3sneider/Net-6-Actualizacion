@@ -30,8 +30,10 @@ namespace WebApi
         public void ConfigurationServices(IServiceCollection services){
             
             // configuracion para evitar data ciclica
+             // configuracion para agrupar los controladores por version
             services.AddControllers(opciones => {
-                opciones.Filters.Add(typeof(FiltroDeExcepcion));
+                opciones.Filters.Add(typeof(FiltroDeExcepcion));                
+                opciones.Conventions.Add(new SwaggerAgrupaPorVersion());
             }).AddJsonOptions(x =>
                 x.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles).AddNewtonsoftJson();   // se jace la insercion de jsonpach 
 
@@ -82,8 +84,14 @@ namespace WebApi
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "WebAPIAutores", Version = "v1" });
+
+                // de esta manera podemos agregar ams documentos de swagger para separar las versiones en diferentes documentos
+                c.SwaggerDoc("v2", new OpenApiInfo { Title = "WebAPIAutores", Version = "v2" });
+
                 // esto es para agregar los parametros en el swagger
                 c.OperationFilter<AgregarParametroHATEOAS>();
+                // estte otro es para poer los parametros por encabezado
+                // c.OperationFilter<AgregarParametroXVersion>();
                 c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
                 {
                     Name = "Authorization",
@@ -170,7 +178,11 @@ namespace WebApi
             if (env.IsDevelopment())
             {
                 app.UseSwagger();
-                app.UseSwaggerUI();
+                // configuracion de enrutamiento de diferentes versiones de swagger
+                app.UseSwaggerUI(c => {
+                    c.SwaggerEndpoint("/swagger/v1/swagger.json", "WebAPIAutores v1");
+                    c.SwaggerEndpoint("/swagger/v2/swagger.json", "WebAPIAutores v2");
+                });
             }
 
             // redirecciona las peticiones https

@@ -3,10 +3,10 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using WebApi.DTOs;
 
-namespace WebApi
+namespace WebApi.Controllers.v1
 {
     [ApiController]
-    [Route("api")]
+    [Route("api/v1")]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class  RootController : ControllerBase
     {
@@ -17,6 +17,7 @@ namespace WebApi
             this.authorizationService = authorizationService;
         }
 
+        // validar como poner los comentarios de ///        
         [HttpGet(Name = "ObtenerRoot")]
         [AllowAnonymous]
         public async Task<ActionResult<IEnumerable<DatoHATEOAS>>> Get()

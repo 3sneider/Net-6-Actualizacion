@@ -2,10 +2,10 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using WebApi.Entidades;
 
-namespace WebApi.Controllers
+namespace WebApi.Controllers.v1
 {
     [ApiController]
-    [Route("api/T1Autores")] 
+    [Route("api/v1/T1Autores")] 
     // api/[Controller] esta regla de ruteo se aplica en el remoto caso de que el nombre del 
     // controlador pueda llegar a cambiar en el futuro cercano
     public class T1AutoresController : ControllerBase

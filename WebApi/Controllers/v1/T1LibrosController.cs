@@ -4,10 +4,10 @@ using WebApi.Entidades;
 using WebApi.Filtros;
 using WebApi.Servicios;
 
-namespace WebApi.Controllers
+namespace WebApi.Controllers.v1
 {
     [ApiController]
-    [Route("api/T1libros")]
+    [Route("api/v1/T1libros")]
     public class T1LibrosController: ControllerBase
     {
         private readonly ApplicationDbContext context;

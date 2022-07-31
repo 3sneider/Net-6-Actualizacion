@@ -7,10 +7,10 @@ using WebApi.DTOs;
 using WebApi.Entidades;
 using WebApi.Utilidades;
 
-namespace WebApi.Controllers
+namespace WebApi.Controllers.v1
 {
     [ApiController]
-    [Route("api/Autores")]
+    [Route("api/v1/Autores")]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Policy = "EsAdmin")] // protegemos un controlador con una politica aplicada
     public class AutoresController : ControllerBase
     {

@@ -2,7 +2,7 @@ Apuntes tutorial y novedades sobre .net 6
 
 -----------------------------------------------------------------------------------------------------------------------------
 
-Este codigo esta totalmente basado en los ejercicios y en la explicacion dada por felipe gavilasn en su curos de udemy 
+Este codigo esta totalmente basado en los ejercicios y en la explicacion dada por felipe gavilan en su curso de udemy 
 Construyendo Web APIs con ASP.NET Core 6. 
 [https://www.udemy.com/share/101qLg3@2sHbteVaczfi3P4D1VCDJh9fhVCdSWgGBP5AA5NYF5sva48H9sJjNEjn12EYKUO8/]
 
@@ -514,7 +514,27 @@ queramos hacer uso de swagger, el tema es muy denso en caso de que se quiera est
 
 -----------------------------------------------------------------------------------------------------------------------------
 
+Varsionamiento Swagger
 
+ya que las aplicacines pueden cambiar en el tiempo y no podemos dejar al cliente sin una vercion estable lo que se busca es
+ofrecerles diferentes versiones de los controladores para ello lo que hacemos es crear una versin diferente de cada controlador
+podemos comenzar creando las diferenctes carpetas de las versions y agrupar los controladores en ca carpeta de la version a trabajar
 
+recuerde que los nombres de los metodos tambien deben cambiar por que si no van a generar conflicto en el despliegue
 
+si ya tenemos los controladores separados por versiones, en la configuracion del swagger podremos seleccionar con que version del 
+api queremos trabajar
+
+es necesario primero en los servicios agregar una referencia a otro documento de swagger como version v2, adicional en el configure
+configuramos para que dependiendo la ruta el swagger me muestre el codumetno al que corresponde
+
+nos valemos de un utility [SwaggerAgrupaPorVersion] para poder agrupar los controladores por namespace para las diferentes versiones,
+este lo agregamos como un servicio
+
+si no queremos alterar los nombres de nuestras rutas tambien lo podemos hacer por medio de un filtro de cabecera 
+[CabeceraEstaPresenteAttribute("header","valor")] y con esto como un filtro podremos definir si esta usando una version u otra
+aunque de todas maneras necesitamremos cambiar los nombres de los metodos por lo que se hace redundante
+
+de igual manera de esta manera no tenemos la ipcion de independendencia en el contenido del controlador, sencillamente si le envio
+en la cabecera una version de controlador que no existe reventaria ya qaue no tenemos visibilidad de si el controlador existe o no
 
