@@ -29,9 +29,15 @@ namespace WebApi.Controllers.v1
         // en vez de traer una lista de dtos, puedo traer una colleccion de Recursos par que ya traigan toda su data integrada
         // Task<ActionResult<ColeccionDeRecursos<AutorDTO>>> recordemos que tambien podemos retornar un IactionResult para poder retornar diferrentes tipos de respuesta
         [ServiceFilter(typeof(HATEOASAutorFilterAttribute))]
-        public async Task<ActionResult<List<AutorDTO>>> Get()
+        public async Task<ActionResult<List<AutorDTO>>> Get([FromQuery] PaginacionDTO paginacionDTO)
         {
-            var autores = await context.Autores.ToListAsync();
+            // para paginar una lista y no traer todos los datos 
+            // Como un get no recibe parametros de la queri vamos a tomar los necesarios para la paginacion
+            var queryable = context.Autores.AsQueryable();
+            await HttpContext.InsertarParametrosPaginacionEnCabecera(queryable);
+
+            var autores = await queryable.OrderBy(autor => autor.Nombre).Paginar(paginacionDTO).ToListAsync();
+            // var autores = await context.Autores.ToListAsync();
             // mapeamos el resultado de la consulta con el DTO
             return mapper.Map<List<AutorDTO>>(autores);            
 

@@ -146,7 +146,8 @@ namespace WebApi
             {
                 opciones.AddDefaultPolicy(builder =>
                 {
-                    builder.WithOrigins("https://www.apirequest.io").AllowAnyMethod().AllowAnyHeader(); // .WithExposedHeaders para exponer headers
+                    builder.WithOrigins("https://www.apirequest.io").AllowAnyMethod().AllowAnyHeader()
+                        .WithExposedHeaders(new string[] {"cantidadTotalRegistros"}); // .WithExposedHeaders para exponer headers
                 });
             });
 
