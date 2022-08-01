@@ -572,3 +572,36 @@ abstenernos de crear muck por funcionalidad, ya depende de la necesidad la elecc
 
 -----------------------------------------------------------------------------------------------------------------------------
 
+Despliegues
+
+con este proceso llevamos el aplicactivo desde nuestro pc a un servidor de produccion, en esta caso vamos a ver en iis y azure app services
+
+cabe anotar que no es un curso de azuro por lo que no entramos a detalle en las app services
+
+desde vs damos en publish, luego escogemos azure - azure windows - creamos una insrtancioa de azure services que es donde va a vivir
+el aplicativo, llenamos los datos de azure, uns vrx se crea el lugar donde vamos a poner la aplicacion damos en siguiente y luego damos publish
+se generan las cofiguraciones del despliegue y configuramos las dependencias a otras necesidades como el de bases de datos y finalmente
+publish y listo
+
+ahora, como lo hariamos desde vs Code, lo primero es crear todos los recursosen azure, bases de datos, app service
+
+una vez creado la ejecutamos las migraciones convirtiendolas primero es scriots con el siguiente comando
+
+*** dotnet-ef migrations script -o script.sql -i
+
+lo cual generarar el script sql de la base de datos para ser ejecutado en la bases ded datos de azure
+
+para publicar la aplicacion ejecutamos el siguiente comando
+
+*** dotnet publish --self-contained -c Release -r win-x64
+
+despues de tener la publicacion local y la ruta donde esta la publicacion, una vez tengamos la publicacion lista vamos al 
+paquete Azure app Services que se puede agregar a vs Code y nos logueamos, seleccionamos el app service que creamos, click derecho
+deploy y buscamos la carpeta donde quedo la publicacion y damos enter y se completa el despliegue
+
+para poder debuggar errores en aplicaciones en azure podemos hacer uso de [Insights] en azure
+
+si tenemos nuestro codigo en github podemos implementar integracion continua creando un pipeline en donde podemos hacer que
+una vez se detecte un cambio en una rama de github nos lo publique automaticamente, en la carpeta AzureFiles queda el yaml de ejemplo
+
+como ya tenemos la integracion continua ahora hacemos el despliegue conttinuo agregando un nuevo release en dev ops
