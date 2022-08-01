@@ -1,2 +1,6 @@
 WebApi/obj/*
 WebApi/bin/*
+
+
+WebApi.Tests/obj/*
+WebApi.Tests/bin/*

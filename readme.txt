@@ -538,3 +538,37 @@ aunque de todas maneras necesitamremos cambiar los nombres de los metodos por lo
 de igual manera de esta manera no tenemos la ipcion de independendencia en el contenido del controlador, sencillamente si le envio
 en la cabecera una version de controlador que no existe reventaria ya qaue no tenemos visibilidad de si el controlador existe o no
 
+
+-----------------------------------------------------------------------------------------------------------------------------
+
+Pruebas automaticas
+
+consiste en automatizar las pruebas del desarrollo, se puede resumir como una funcion que prueba tu codigo, consta de tres partes
+prepara, probar y verificar.
+
+las pruebas unitarias se encargan de probar una unidad de trabajo, son muy rapidas y tienden a probar una funcion de una clase 
+
+para crear una prueba unitaria creamos un nuevo proyecto de tipo test con el siguiente  comando
+
+*** dotnet new mstest -o WebApi.Tests
+
+para empezar a hacer referencia a los metodos de nuestro webapi ejecutamos el siguiente comando
+
+*** dotnet add WebApi.Tests.csproj reference ../WebApi/WebApi.csproj
+
+cuando tengamos construido el metodo de prueba podemos ejecutar nuestros test con el siguiente comando
+
+*** dotnet test
+
+aqui ya podemos probar los diferentes escenarios de nuestra aplicacion
+
+a la hora de hacer pruebas no todas la clases que tenemos no tienen dependencia, existen casos como el de rootController
+para poder controlar esas dependencias usamos un concepto llamado Moks para pderme concentrar en la funcionalidad real de lo
+que quiero probar
+
+para crear moks mas estandart y no tener que crear tantos por condicion nos valemos de la libreria muq, con esta libreria podemos 
+abstenernos de crear muck por funcionalidad, ya depende de la necesidad la eleccion
+
+
+-----------------------------------------------------------------------------------------------------------------------------
+
