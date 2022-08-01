@@ -1,0 +1,30 @@
+Ahora que ya hemos aprendido todo lo que necesitabamos aprender de .Net 6 vamos a aplicarlo en un proyecto en limpio
+
+este proyecto trabajara sobre un esquema de peliculas y vamos a realizar todo el analisis desde el comienzo
+
+para este aplicativo vamos a trabajar con las siguientes entidades
+
+Salas de cine
+Generos
+peliculas
+Reviews
+Actores
+Usuarios
+
+donde vamos a tener las siguientes relaciones muchos a muchos 
+
+peliculas *..* Salas de cine
+peliculas *..* Generos
+peliculas *..* Actores
+peliculas *..* Reviews
+Reviewa *..1 Usuarios
+
+Pasos seguidos
+
+1 - creamos la aplicacion ejecutando el comando [dotnet new webapi -o PeliculasApi]
+
+2 - cambiamos el parametro [nullable] en el csproj a disabled
+
+3 - agregamos y configuramos nuestra clase startup
+
+4 - agregamos nuestro archivo .gitignore con referencia a nuestras carpetas binarias bin/obj

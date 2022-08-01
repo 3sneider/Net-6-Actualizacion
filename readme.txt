@@ -50,19 +50,32 @@ como propiedad.
 
 - vamos a crear dos metodos de tipo void, el primero sera el [ConfigurationServices] el cual recibira un parametro  de tipo
 [IServiceCollection], y un segundo metodo llamado [Configure] el cual recibira dos parametros, uno de tipo [IApplicationBuilder] 
-y otro de Tipo [IWebHostEnviroment]
+y otro de Tipo [IWebHostEnvironment]
 
 - todos los servicios que se encuentran en el prgram creados por el builder los pasamos a ConfigurationServices y los 
 invocamos desde la propiedad services del metodo [ConfigurationServices]
 
 - todos los middleware inyectados por app en program son pasados a la clase configure, a excepcion del app.run; 
 implementamos el [app.UseRouting] que ubicamos despues de [app.UseHttpRedirection] y remplazamos a [app.MapControllers] por
-[useEndpoint] que colocamos al final.
+[app.useEndpoint] que colocamos al final con la siguiente configuracion.
+
+***  app.UseEndpoints(endpoints => {
+***      endpoints.MapControllers();
+***  });
 
 - una vez tenemos todos los servicios y los middleware en el startup nos queda solo instanciar e inicializar los metodos desde la 
 clase program
 
-una configuracion adicional que podemos ejecutar para notener quepreocuparnos por los tipos de referencias nulas lo hacemos desde
+- iniciamos con esta configura cion despues del builder
+
+*** var startup = new Startup(builder.configuration);
+*** startup.ConfigurationServices(builder.Services);
+
+- luego ponemos la siguiente instancia despues del app
+
+***  startup.Configure(app.Environment);
+
+una configuracion adicional que podemos ejecutar para no tener que preocuparnos por los tipos de referencias nulas lo hacemos desde
 el [.csproj] cambiando la propiedad [Nulleable] a disable
 
 -----------------------------------------------------------------------------------------------------------------------------
